@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import subprocess
+import json
 import gi
 gi.require_version('Gtk', '3.0')
 
@@ -20,7 +21,9 @@ class App(object):
         self.voltage = builder.get_object('voltage_label')
         self.current = builder.get_object('current_label')
         self.power = builder.get_object('power_label')
-        self.temperature = builder.get_object('temperature_label')
+        self.cpu0 = builder.get_object('cpu0_label')
+        self.gpu0 = builder.get_object('gpu0_label')
+        self.gpu1 = builder.get_object('gpu1_label')
         self.health = builder.get_object('health_label')
         self.voltage_now = 0
         self.current_now = 0
@@ -38,7 +41,7 @@ class App(object):
         self.update_voltage()
         self.update_current()
         self.update_power()
-        self.update_temperature()
+        self.update_temperatures()
         self.update_health()
         return True
 
@@ -62,8 +65,15 @@ class App(object):
         power = self.voltage_now * self.current_now
         self.power.set_text(f"{power:.3f} W")
 
-    def update_temperature(self):
-        pass
+    def update_temperatures(self):
+        chips = ["cpu0_thermal-virtual-0", "gpu0_thermal-virtual-0", 
+                 "gpu1_thermal-virtual-0"]
+        labels = [self.cpu0, self.gpu0, self.gpu1]
+
+        data = sensors()
+
+        for chip, label in zip(chips, labels):
+            label.set_text(f'{data[chip]["temp1"]["temp1_input"]} °C')
 
     def update_health(self):
         health = cat(f"{self.path}/health")
@@ -76,10 +86,20 @@ class App(object):
         else:
             self.discharging = False
 
+
 def cat(path):
     task = subprocess.Popen(["cat", path], stdout=subprocess.PIPE)
     for item in task.stdout:
         return item.decode("utf-8").strip()
+
+
+def sensors():
+    task = subprocess.Popen(["sensors", "-j"], stdout=subprocess.PIPE)
+    buffer = ""
+    for item in task.stdout:
+        buffer += item.decode("utf-8").strip()
+
+    return json.loads(buffer)
 
 
 def main():
@@ -98,5 +118,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO: - Either remove the temperature or add all of them + the load average?
-#       - Charging and discharging currents, colors for the gauge, status charging/discharging...
+# TODO: - Either remove the temperature or add all of them
+#       - Colors for the gauge, status charging/discharging...
