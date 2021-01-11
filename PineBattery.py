@@ -36,6 +36,7 @@ class App(object):
         self.update_power()
         self.update_temperature()
         self.update_health()
+        print("done")
 
     def update_capacity(self):
         capacity = int(cat(f"{self.path}/capacity"))
