@@ -25,6 +25,7 @@ class App(object):
         self.voltage_now = 0
         self.current_now = 0
         self.path = "/sys/class/power_supply/axp20x-battery"
+        self.discharging = True
 
         self.updateValues()
 
@@ -33,6 +34,7 @@ class App(object):
 
     def updateValues(self):
         self.update_capacity()
+        self.update_status()
         self.update_voltage()
         self.update_current()
         self.update_power()
@@ -52,6 +54,7 @@ class App(object):
 
     def update_current(self):
         current = int(cat(f"{self.path}/current_now")) / 1000000
+        current = -current if self.discharging else current
         self.current.set_text(f"{current:.3f} A")
         self.current_now = current
 
@@ -66,6 +69,12 @@ class App(object):
         health = cat(f"{self.path}/health")
         self.health.set_text(health)
 
+    def update_status(self):
+        status = cat(f"{self.path}/status")
+        if status == "Discharging":
+            self.discharging = True
+        else:
+            self.discharging = False
 
 def cat(path):
     task = subprocess.Popen(["cat", path], stdout=subprocess.PIPE)
