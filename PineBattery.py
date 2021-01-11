@@ -26,6 +26,8 @@ class App(object):
         self.current_now = 0
         self.path = "/sys/class/power_supply/axp20x-battery"
 
+        self.updateValues()
+
         # Start the auto-updater in the background with a 1s interval
         GLib.timeout_add(interval=1000, function=self.updateValues)
 
@@ -58,7 +60,6 @@ class App(object):
         self.power.set_text(f"{power:.3f} W")
 
     def update_temperature(self):
-        # TODO : Is there even a sensor that can read this value?
         pass
 
     def update_health(self):
@@ -87,3 +88,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# TODO: - Either remove the temperature or add all of them + the load average?
+#       - Charging and discharging currents, colors for the gauge, status charging/discharging...
