@@ -73,7 +73,7 @@ class App(object):
         data = sensors()
 
         for chip, label in zip(chips, labels):
-            label.set_text(f'{data[chip]["temp1"]["temp1_input"]} °C')
+            label.set_text(f'{data[chip]["temp1"]["temp1_input"]:.1f} °C')
 
     def update_health(self):
         health = cat(f"{self.path}/health")
