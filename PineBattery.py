@@ -29,9 +29,6 @@ class App(object):
         # Start the auto-updater in the background with a 1s interval
         GLib.timeout_add(interval=1000, function=self.updateValues)
 
-    def onDestroy(self, *args):
-        Gtk.main_quit()
-
     def updateValues(self):
         self.update_capacity()
         self.update_voltage()
@@ -39,7 +36,7 @@ class App(object):
         self.update_power()
         self.update_temperature()
         self.update_health()
-        print("done")
+        return True
 
     def update_capacity(self):
         capacity = int(cat(f"{self.path}/capacity"))
@@ -80,6 +77,7 @@ def main():
     builder.add_from_file('UI.glade')
 
     window = builder.get_object('main_window')
+    window.connect('delete-event', Gtk.main_quit)
 
     builder.connect_signals(App(builder))
 
