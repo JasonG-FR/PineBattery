@@ -62,7 +62,7 @@ class App(object):
 
     def update_health(self):
         health = cat(f"{self.path}/health")
-        self.power.set_text(health)
+        self.health.set_text(health)
 
 
 def cat(path):
