@@ -87,6 +87,11 @@ class App(object):
             self.discharging = False
 
 
+def abs_path(filename):
+    script_path = "/".join(__file__.split("/")[:-1])
+    return f"{script_path}/{filename}"
+
+
 def cat(path):
     task = subprocess.Popen(["cat", path], stdout=subprocess.PIPE)
     for item in task.stdout:
@@ -104,7 +109,7 @@ def sensors():
 
 def main():
     builder = Gtk.Builder()
-    builder.add_from_file('UI.glade')
+    builder.add_from_file(abs_path('UI.glade'))
 
     window = builder.get_object('main_window')
     window.connect('delete-event', Gtk.main_quit)
@@ -118,5 +123,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO: - Either remove the temperature or add all of them
+# TODO: - Smoothen the readings (rolling avg + lower refresh rate?)
 #       - Colors for the gauge, status charging/discharging...
+#       - Landscape mode doesn't look great on the pinephone, UI optimizations
