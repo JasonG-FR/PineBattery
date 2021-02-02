@@ -14,7 +14,7 @@ class App(object):
     docstring
     """
 
-    def __init__(self, builder, ravg=1):
+    def __init__(self, builder, ravg=3):
         self.device = builder.get_object('device_id')
         self.cap_label = builder.get_object('cap_label')
         self.cap_gauge = builder.get_object('cap_gauge')
