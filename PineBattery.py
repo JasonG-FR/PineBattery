@@ -14,7 +14,7 @@ class App(object):
     docstring
     """
 
-    def __init__(self, builder, ravg=3):
+    def __init__(self, builder, ravg=5):
         self.device = builder.get_object('device_id')
         self.cap_label = builder.get_object('cap_label')
         self.cap_gauge = builder.get_object('cap_gauge')
@@ -41,7 +41,7 @@ class App(object):
         self.updateValues()
 
         # Start the auto-updater in the background with a 1s interval
-        GLib.timeout_add(interval=1000, function=self.updateValues)
+        GLib.timeout_add(interval=500, function=self.updateValues)
 
 
     def calc_ravg(self, attr_name, value):
