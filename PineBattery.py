@@ -14,7 +14,7 @@ class App(object):
     docstring
     """
 
-    def __init__(self, builder, ravg=5):
+    def __init__(self, builder, ravg=10):
         self.device = builder.get_object('device_id')
         self.cap_label = builder.get_object('cap_label')
         self.cap_gauge = builder.get_object('cap_gauge')
@@ -164,5 +164,6 @@ if __name__ == "__main__":
 # TODO:  - Add status (charging/discharging)
 #        - Add uptime + load average
 #        - Landscape mode, UI optimizations
+#        - Add rolling avg and refresh rate options
 #
 # DOING: - Add rolling avg for stability
