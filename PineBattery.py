@@ -25,6 +25,7 @@ class App(object):
         self.gpu0 = builder.get_object('gpu0_label')
         self.gpu1 = builder.get_object('gpu1_label')
         self.health = builder.get_object('health_label')
+        self.status = builder.get_object('status_label')
         self.voltage_now = 0
         self.current_now = 0
         self.path = "/sys/class/power_supply/axp20x-battery"
@@ -123,6 +124,7 @@ class App(object):
             self.discharging = True
         else:
             self.discharging = False
+        self.status.set_text(status)
 
 
 def abs_path(filename):
@@ -161,9 +163,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO:  - Add status (charging/discharging)
-#        - Add uptime + load average
+# TODO:  - Add uptime + load average
 #        - Landscape mode, UI optimizations
 #        - Add rolling avg and refresh rate options
 #
-# DOING: - Add rolling avg for stability
