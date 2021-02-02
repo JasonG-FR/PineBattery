@@ -14,7 +14,7 @@ class App(object):
     docstring
     """
 
-    def __init__(self, builder):
+    def __init__(self, builder, ravg=1):
         self.device = builder.get_object('device_id')
         self.cap_label = builder.get_object('cap_label')
         self.cap_gauge = builder.get_object('cap_gauge')
@@ -29,11 +29,42 @@ class App(object):
         self.current_now = 0
         self.path = "/sys/class/power_supply/axp20x-battery"
         self.discharging = True
-
+        self.ravg = ravg
+        self.capacity_values = []
+        self.voltage_values = []
+        self.voltage_now_values = []
+        self.current_values = []
+        self.temperature_values = {"cpu0_thermal-virtual-0": [], 
+                                   "gpu0_thermal-virtual-0": [], 
+                                   "gpu1_thermal-virtual-0": []}
+                 
         self.updateValues()
 
         # Start the auto-updater in the background with a 1s interval
         GLib.timeout_add(interval=1000, function=self.updateValues)
+
+
+    def calc_ravg(self, attr_name, value):
+        values = getattr(self, attr_name)
+        while len(values) >= self.ravg:
+            del(values[0])
+
+        values.append(value)
+        setattr(self, attr_name, values)
+        
+        return sum(values) / len(values)
+
+
+    def calc_ravg_temp(self, chip, temp):
+        values = self.temperature_values[chip]
+        while len(values) >= self.ravg:
+            del(values[0])
+
+        values.append(value)
+        self.temperature_values[chip] = values
+        
+        return sum(values) / len(values)
+
 
     def updateValues(self):
         self.update_capacity()
@@ -47,19 +78,24 @@ class App(object):
 
     def update_capacity(self):
         capacity = int(cat(f"{self.path}/capacity"))
-        self.cap_label.set_text(f"{capacity} %")
-        self.cap_gauge.set_value(capacity)
+        ravg_capacity = self.calc_ravg("capacity_values", capacity)
+        self.cap_label.set_text(f"{ravg_capacity:.0f} %")
+        self.cap_gauge.set_value(ravg_capacity)
 
     def update_voltage(self):
         voltage = int(cat(f"{self.path}/voltage_ocv")) / 1000000
-        self.voltage.set_text(f"{voltage:.3f} V")
-        self.voltage_now = int(cat(f"{self.path}/voltage_now")) / 1000000
+        ravg_voltage = self.calc_ravg("voltage_values", voltage)
+        self.voltage.set_text(f"{ravg_voltage:.3f} V")
+        
+        voltage_now = int(cat(f"{self.path}/voltage_now")) / 1000000
+        self.voltage_now = self.calc_ravg("voltage_now_values", voltage_now)
 
     def update_current(self):
         current = int(cat(f"{self.path}/current_now")) / 1000000
         current = -current if self.discharging else current
-        self.current.set_text(f"{current:.3f} A")
-        self.current_now = current
+        ravg_current = self.calc_ravg("current_values", current)
+        self.current.set_text(f"{ravg_current:.3f} A")
+        self.current_now = ravg_current
 
     def update_power(self):
         power = self.voltage_now * self.current_now
@@ -73,7 +109,9 @@ class App(object):
         data = sensors()
 
         for chip, label in zip(chips, labels):
-            label.set_text(f'{data[chip]["temp1"]["temp1_input"]:.1f} °C')
+            temp = data[chip]["temp1"]["temp1_input"]
+            ravg_temp = self.calc_ravg_temp(chip, temp)
+            label.set_text(f'{ravg_temp:.1f} °C')
 
     def update_health(self):
         health = cat(f"{self.path}/health")
@@ -123,6 +161,8 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO: - Smoothen the readings (rolling avg + lower refresh rate?)
-#       - Colors for the gauge, status charging/discharging...
-#       - Landscape mode doesn't look great on the pinephone, UI optimizations
+# TODO:  - Add status (charging/discharging)
+#        - Add uptime + load average
+#        - Landscape mode, UI optimizations
+#
+# DOING: - Add rolling avg for stability
