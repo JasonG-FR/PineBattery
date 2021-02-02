@@ -56,14 +56,14 @@ class App(object):
 
 
     def calc_ravg_temp(self, chip, temp):
-        values = self.temperature_values[chip]
-        while len(values) >= self.ravg:
-            del(values[0])
+        temps = self.temperature_values[chip]
+        while len(temps) >= self.ravg:
+            del(temps[0])
 
-        values.append(value)
-        self.temperature_values[chip] = values
+        temps.append(temp)
+        self.temperature_values[chip] = temps
         
-        return sum(values) / len(values)
+        return sum(temps) / len(temps)
 
 
     def updateValues(self):
