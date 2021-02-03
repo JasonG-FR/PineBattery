@@ -26,6 +26,9 @@ class App(object):
         self.gpu1 = builder.get_object('gpu1_label')
         self.health = builder.get_object('health_label')
         self.status = builder.get_object('status_label')
+        self.load = builder.get_object('load_label')
+        self.uptime = builder.get_object('uptime_label')
+
         self.voltage_now = 0
         self.current_now = 0
         self.path = "/sys/class/power_supply/axp20x-battery"
@@ -44,7 +47,6 @@ class App(object):
         # Start the auto-updater in the background with a 1s interval
         GLib.timeout_add(interval=500, function=self.updateValues)
 
-
     def calc_ravg(self, attr_name, value):
         values = getattr(self, attr_name)
         while len(values) >= self.ravg:
@@ -54,7 +56,6 @@ class App(object):
         setattr(self, attr_name, values)
         
         return sum(values) / len(values)
-
 
     def calc_ravg_temp(self, chip, temp):
         temps = self.temperature_values[chip]
@@ -66,7 +67,6 @@ class App(object):
         
         return sum(temps) / len(temps)
 
-
     def updateValues(self):
         self.update_capacity()
         self.update_status()
@@ -75,7 +75,10 @@ class App(object):
         self.update_power()
         self.update_temperatures()
         self.update_health()
-        return True
+        self.update_load()
+        self.update_uptime()
+
+        return True  # Auto-updater stops if function doesn't return True
 
     def update_capacity(self):
         capacity = int(cat(f"{self.path}/capacity"))
@@ -116,7 +119,7 @@ class App(object):
 
     def update_health(self):
         health = cat(f"{self.path}/health")
-        self.health.set_text(health)
+        self.health.set_text(f"Health : {health}")
 
     def update_status(self):
         status = cat(f"{self.path}/status")
@@ -126,6 +129,13 @@ class App(object):
             self.discharging = False
         self.status.set_text(status)
 
+    def update_load(self):
+        load = cat("/proc/loadavg")[:14].replace(" ", ", ")
+        self.load.set_text(f"Load : {load}")
+
+    def update_uptime(self):
+        self.uptime.set_text(f"Uptime : {uptime()[3:]}")  # Removes "up "
+
 
 def abs_path(filename):
     script_path = "/".join(__file__.split("/")[:-1])
@@ -134,6 +144,12 @@ def abs_path(filename):
 
 def cat(path):
     task = subprocess.Popen(["cat", path], stdout=subprocess.PIPE)
+    for item in task.stdout:
+        return item.decode("utf-8").strip()
+
+
+def uptime():
+    task = subprocess.Popen(["uptime", "-p"], stdout=subprocess.PIPE)
     for item in task.stdout:
         return item.decode("utf-8").strip()
 
@@ -163,7 +179,8 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO:  - Add uptime + load average
-#        - Landscape mode, UI optimizations
+# TODO:  - Landscape mode, UI optimizations
 #        - Add rolling avg and refresh rate options
-#
+#        - Performance optimizations : no need to get uptime each time, don't 
+#                                      update UI if nothing changed (status, 
+#                                      percentage, health, ...), ...
