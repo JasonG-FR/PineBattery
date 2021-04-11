@@ -1,6 +1,6 @@
 # PineBattery
 
-## GTK app for monitoring the PinePhone and PineTab battery.
+## GTK app for monitoring the PinePhone and PineTab battery
 
 ### Dependencies
 
