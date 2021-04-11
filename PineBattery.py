@@ -178,9 +178,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# TODO:  - Landscape mode, UI optimizations
-#        - Add rolling avg and refresh rate options
-#        - Performance optimizations : no need to get uptime each time, don't 
-#                                      update UI if nothing changed (status, 
-#                                      percentage, health, ...), ...
