@@ -1,6 +1,6 @@
 # PineBattery
 
-## GTK app for monitoring the battery of the PinePhone and PineTab.
+## GTK app for monitoring the PinePhone and PineTab battery.
 
 ### Dependencies
 
@@ -16,4 +16,4 @@ Run the `uninstall.sh` script to remove the app from your launcher.
 
 ### Screenshot
 
-![screenshot](img/Screenshot_PP.png)
+![pinephone_screenshot](img/Screenshot_PP.png)
