@@ -31,7 +31,7 @@ class App(object):
 
         self.voltage_now = 0
         self.current_now = 0
-        self.path = "/sys/class/power_supply/axp20x-battery"
+        self.path = "/sys/class/power_supply/battery"
         self.discharging = True
         self.ravg = ravg
         self.capacity_values = []
@@ -73,7 +73,7 @@ class App(object):
         self.update_voltage()
         self.update_current()
         self.update_power()
-        self.update_temperatures()
+        #self.update_temperatures()
         self.update_health()
         self.update_load()
         self.update_uptime()
@@ -87,7 +87,7 @@ class App(object):
         self.cap_gauge.set_value(ravg_capacity)
 
     def update_voltage(self):
-        voltage = int(cat(f"{self.path}/voltage_ocv")) / 1000000
+        voltage = int(cat(f"{self.path}/voltage_max")) / 1000000
         ravg_voltage = self.calc_ravg("voltage_values", voltage)
         self.voltage.set_text(f"{ravg_voltage:.3f} V")
         
