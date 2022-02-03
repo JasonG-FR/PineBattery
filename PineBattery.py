@@ -55,6 +55,7 @@ class App(object):
             builder.get_object(label).set_text("")
             builder.get_object(value).set_text("")
 
+        self.update_health()
         self.updateValues()
 
         # Start the auto-updater in the background with the selected interval
@@ -87,7 +88,6 @@ class App(object):
         self.update_current()
         self.update_power()
         self.update_temperatures()
-        self.update_health()
         self.update_load()
         self.update_uptime()
 
@@ -131,7 +131,10 @@ class App(object):
 
     def update_health(self):
         health = cat(f"{self.path}/health")
-        self.health.set_text(f"Health : {health}")
+        if health:
+            self.health.set_text(f"Health : {health}")
+        else:
+            self.health.set_text("Health : N/A")
 
     def update_status(self):
         status = cat(f"{self.path}/status")
