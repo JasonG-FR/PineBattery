@@ -205,7 +205,7 @@ def sensors():
 
 
 def init_temp_sensors():
-    chips = [chip for chip in sensors() if "cpu" in chip or "gpu" in chip]
+    chips = sorted([chip for chip in sensors() if "cpu" in chip or "gpu" in chip])
     return {chip:[] for chip in chips[:3]}  # [:3] to make sure we get max 3 sensors
 
 
