@@ -21,9 +21,9 @@ class App(object):
         self.voltage = builder.get_object('voltage_label')
         self.current = builder.get_object('current_label')
         self.power = builder.get_object('power_label')
-        self.cpu0 = builder.get_object('cpu0_label')
-        self.gpu0 = builder.get_object('gpu0_label')
-        self.gpu1 = builder.get_object('gpu1_label')
+        self.sensor0 = builder.get_object('sensor0_value')
+        self.sensor1 = builder.get_object('sensor1_value')
+        self.sensor2 = builder.get_object('sensor2_value')
         self.health = builder.get_object('health_label')
         self.status = builder.get_object('status_label')
         self.load = builder.get_object('load_label')
@@ -40,15 +40,26 @@ class App(object):
         self.voltage_values = []
         self.voltage_now_values = []
         self.current_values = []
-        self.temperature_values = {"cpu0_thermal-virtual-0": [], 
-                                   "gpu0_thermal-virtual-0": [], 
-                                   "gpu1_thermal-virtual-0": []}
+
+        self.temperature_values = init_temp_sensors()
+        sensor_labels = ['sensor0_label', 'sensor1_label', 'sensor2_label']
+        sensor_values = ['sensor0_value', 'sensor1_value', 'sensor2_value']
+        sensor_names = self.temperature_values.keys()
+
+        # Set the sensor labels to match 'sensors' output
+        for label, name in zip(sensor_labels[:len(sensor_names)], sensor_names):
+            builder.get_object(label).set_text(f"{name.split('_')[0]} :")
+        # Blanks the sensor labels and values if not available
+        for label, value in zip(sensor_labels[len(sensor_names):],
+                                sensor_values[len(sensor_names):]):
+            builder.get_object(label).set_text("")
+            builder.get_object(value).set_text("")
 
         self.updateValues()
 
         # Start the auto-updater in the background with the selected interval
         GLib.timeout_add(interval=interval, function=self.updateValues)
-            
+
     def calc_ravg(self, attr_name, value):
         values = getattr(self, attr_name)
         while len(values) >= self.ravg:
@@ -75,7 +86,7 @@ class App(object):
         self.update_voltage()
         self.update_current()
         self.update_power()
-        #self.update_temperatures()
+        self.update_temperatures()
         self.update_health()
         self.update_load()
         self.update_uptime()
@@ -108,13 +119,12 @@ class App(object):
         self.power.set_text(f"{power:.3f} W")
 
     def update_temperatures(self):
-        chips = ["cpu0_thermal-virtual-0", "gpu0_thermal-virtual-0", 
-                 "gpu1_thermal-virtual-0"]
-        labels = [self.cpu0, self.gpu0, self.gpu1]
+        chips = self.temperature_values.keys()
+        labels = [self.sensor0, self.sensor1, self.sensor2]
 
         data = sensors()
 
-        for chip, label in zip(chips, labels):
+        for chip, label in zip(chips, labels[:len(chips)]):
             temp = data[chip]["temp1"]["temp1_input"]
             ravg_temp = self.calc_ravg_temp(chip, temp)
             label.set_text(f'{ravg_temp:.1f} °C')
@@ -189,6 +199,11 @@ def sensors():
         buffer += item.decode("utf-8").strip()
 
     return json.loads(buffer)
+
+
+def init_temp_sensors():
+    chips = [chip for chip in sensors() if "cpu" in chip or "gpu" in chip]
+    return {chip:[] for chip in chips[:3]}  # [:3] to make sure we get max 3 sensors
 
 
 def main():

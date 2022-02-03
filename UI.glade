@@ -170,7 +170,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="sensor0_label">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
@@ -182,7 +182,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="cpu0_label">
+                  <object class="GtkLabel" id="sensor0_value">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
@@ -195,7 +195,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="sensor1_label">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
@@ -207,7 +207,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu0_label">
+                  <object class="GtkLabel" id="sensor1_value">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
@@ -220,7 +220,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="sensor2_label">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">end</property>
@@ -232,7 +232,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="gpu1_label">
+                  <object class="GtkLabel" id="sensor2_value">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
