@@ -31,7 +31,9 @@ class App(object):
 
         self.voltage_now = 0
         self.current_now = 0
-        self.path = "/sys/class/power_supply/battery"
+        self.path = get_battery_path()
+        self.voltage_max_path = f"{self.path}/{get_voltage_max_path(self.path)}"
+
         self.discharging = True
         self.ravg = ravg
         self.capacity_values = []
@@ -41,12 +43,12 @@ class App(object):
         self.temperature_values = {"cpu0_thermal-virtual-0": [], 
                                    "gpu0_thermal-virtual-0": [], 
                                    "gpu1_thermal-virtual-0": []}
-                 
+
         self.updateValues()
 
         # Start the auto-updater in the background with the selected interval
         GLib.timeout_add(interval=interval, function=self.updateValues)
-
+            
     def calc_ravg(self, attr_name, value):
         values = getattr(self, attr_name)
         while len(values) >= self.ravg:
@@ -87,7 +89,7 @@ class App(object):
         self.cap_gauge.set_value(ravg_capacity)
 
     def update_voltage(self):
-        voltage = int(cat(f"{self.path}/voltage_max")) / 1000000
+        voltage = int(cat(self.voltage_max_path)) / 1000000
         ravg_voltage = self.calc_ravg("voltage_values", voltage)
         self.voltage.set_text(f"{ravg_voltage:.3f} V")
         
@@ -148,6 +150,32 @@ def cat(path):
         return item.decode("utf-8").strip()
 
 
+def get_battery_path():
+    task = subprocess.Popen(["ls", "/sys/class/power_supply/"], stdout=subprocess.PIPE)
+    for item in task.stdout:
+        d_item = item.decode("utf-8").strip()
+        if "battery" in d_item:
+            return f"/sys/class/power_supply/{d_item}"
+
+
+def ls(path):
+    task = subprocess.Popen(["ls", path], stdout=subprocess.PIPE)
+    return [item.decode("utf-8").strip() for item in task.stdout]
+        
+
+def get_voltage_max_path(battery_path):
+    parameters = ls(battery_path)
+    if "voltage_ocv" in parameters:
+        # It's a PinePhone or a PineTab
+        return "voltage_ocv"
+    elif "voltage_max" in parameters:
+        # It's a PinePhone Pro
+        return "voltage_max"
+    else:
+        # It's something else (PineBookPro)
+        return "voltage_now"
+
+
 def uptime():
     task = subprocess.Popen(["uptime", "-p"], stdout=subprocess.PIPE)
     for item in task.stdout:
@@ -168,7 +196,7 @@ def main():
     builder.add_from_file(abs_path('UI.glade'))
 
     window = builder.get_object('main_window')
-    window.connect('delete-event', Gtk.main_quit)
+    window.connect('delete-event', Gtk.main_quit) 
 
     builder.connect_signals(App(builder))
 
